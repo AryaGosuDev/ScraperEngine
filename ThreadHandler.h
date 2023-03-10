@@ -10,7 +10,7 @@ class AbstractThreadHandler : public ThreadHandler {
  private:
  public:
   AbstractHandler() {}
-  std::string Handle(std::string request) override {
+  virtual std::string Handle(std::string request) override {
     return {};
   }
 };
