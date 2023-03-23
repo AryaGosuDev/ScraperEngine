@@ -1,0 +1,11 @@
+[
+{
+	"WebSiteToScrape":"https://wwww.reddit.com",
+	"WaitTimePerThread":"10",
+	"DBUSERNAME":"p",
+	"DB_PW":"p",
+	"DB_ADDRESS":"localhost",
+	"DB_PORT":"88",
+	"DB_NAME":"p"
+}
+]
