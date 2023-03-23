@@ -15,7 +15,8 @@ template<typename T>
 void ThreadSafeConcurrentQueue<T>::push ( T new_value ) {
 	shared_ptr<T> data ( make_shared<T> ( move(new_value))) ;
 	lock_guard<mutex> lk ( mut );
-	q.push(data);
+	if ( hashT.find ( new_value ) == end ( hashT ) ) 
+		q.push(data);
 	data_cond.notify_one() ;
 }
 
