@@ -44,22 +44,30 @@ class MainEngine {
 		std::string DB_LOCATION ;
 		std::string DB_PORT ;
 		std::string DB_DBNAME ;
-		bool verificationStart ;
+		bool verificationEnd ;
+		std::atomic<bool> verificationStart ;
 		std::condition_variable verificationCond;
+		std::vector<std::atomic<bool>> threadVerificationWaits = {} ;
+		std::mutex verificationEndMutex ;
 	};
 
 	public :
 		MainEngine() {}
 		~MainEngine() ;
-		bool setUpEngine () ;
 		void runEngine () ;
-		void setScrapeThreads() ;
+		
 	private :
 		std::string URLToScrape ;
 		
-		std::vector<ScrapeThread> scrapeThreads = {} ;
-		std::vector<VerificationThread> verificationThreads = {} ;
-		std::vector<std::condition_variable> threadVerificationWaits = {} ;
+		std::vector<std::Thread> scrapingThreads = {} ;
+		std::vector<ScrapeThread> scrapers = {} ;
+		
+		std::vector<std::Thread> verificationThreads = {} ;
+		std::vector<VerificationThread> verifiers = {} ;
+		
 		int numberOfScrapeThreads ;
+		int numberOfVerificationThreads ;
+		
+		ThreadData * td ;
 };
 

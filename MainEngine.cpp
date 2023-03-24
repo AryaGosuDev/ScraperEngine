@@ -101,41 +101,62 @@ MainEngine::MainEngine() {
 		Document d ;
 		d.ParseStream(isw) ;
 		
-		ThreadData td ;
+		td = new ThreadData () ;
 		
-		td.numberOfScrapeThreads = std::thread::hardware_concurrency() ;
+		numberOfScrapeThreads = std::thread::hardware_concurrency() ;
+		numberOfVerificationThreads = 1 ;
 		
-		td.DB_USERNAME = d["DBUSERNAME"];
-		td.DB_PW       = d["DB_PW"];
-		td.DB_LOCATION = d["DB_ADDRESS"];
-		td.DP_PORT	   = d["DB_PORT"];
-		td.DB_DBNAME   = d["DB_DBNAME"];
+		td->DB_USERNAME = d["DBUSERNAME"];
+		td->DB_PW       = d["DB_PW"];
+		td->DB_LOCATION = d["DB_ADDRESS"];
+		td->DP_PORT	   = d["DB_PORT"];
+		td->DB_DBNAME   = d["DB_DBNAME"];
 		
-		td.domainToScrape = d["WebSiteToScrape"];
-		td.threadWaitTime = d["WaitTimePerThread"];
+		td->domainToScrape = d["WebSiteToScrape"];
+		td->threadWaitTime = d["WaitTimePerThread"];
 		
-		td.dbHook = new DB_Hook() ;
-		td.dbHook->connectToDB ( td.DB_LOCATION,td.DP_PORT, td.DB_DBNAME , td.DB_PW , td.DB_USERNAME ) ;
+		td=>dbHook = new DB_Hook() ;
+		td->dbHook->connectToDB ( td.DB_LOCATION,td.DP_PORT, td.DB_DBNAME , td.DB_PW , td.DB_USERNAME ) ;
 		
-		td.verificationStart = false ;
-		
-		
-		scrapeThreads.resize ( td.numberOfScrapeThreads ) ;
-		verificationThreads.resize ( 1 ) ;
-		threadVerificationWaits.resize ( td.numberOfScrapeThreads ) ;
-		
-		for ( int i = 0 ; i < td.numberOfScrapeThreads ; ++ i ) {
-			
-			scrapeThreads[i].
-			
-		}
-		
-		
-		
-		
-		
+		td->verificationStart = false ;
+		td->threadVerificationWaits.resize ( td.numberOfScrapeThreads ) ;
 	}
 	catch ( ... ) {
 		std::cerr << "Error in MainEngine::MainEngine() " << endl ;
+	}
+}
+
+void MainEngine::runEngine() {
+	try {
+		
+		for ( size_t i = 0 ; i < td.numberOfScrapeThreads ; ++ i ) {
+			ScrapeThread tempScraper ( td, i ) ;
+			scrapers.push_back ( std::move ( tempScraper )) ;
+			
+			std::thread tempTd ( scrapers.back().run() ) ;
+			scrapingThreads.push_back ( std::move ( tempTd ) ) ;	
+		}
+		
+		for ( size_t i = 0 ; i < td.numberOfVerificationThreads ; ++ i ) {
+			VerificationThread tempVerify ( td, i ) ;
+			verifiers.push_back ( std::move ( tempVerify )) ;
+			
+			std::thread tempTd ( verifiers.back().run() ) ;
+			verificationThreads.push_back ( std::move ( tempTd ) ) ;	
+		}
+		
+		for ( size_t i = 0 ; i <  td.numberOfScrapeThreads ; ++ i )  
+			scrapingThreads[i].join () ;
+		
+		
+		for ( size_t i = 0 ; i <  td.numberOfVerificationThreads ; ++ i )  
+			verificationThreads[i].join () ;
+		
+		std::cout <<  " Successfully ended process " << std::endl ;
+		
+	}
+	catch ( ... ) {
+		std::cerr << "Error in MainEngine::runEngine" << std::endl ;
+		
 	}
 }

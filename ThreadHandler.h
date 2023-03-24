@@ -14,7 +14,7 @@ class ThreadHandler {
 	public:
 		ThreadHandler () = default ;
 		virtual std::string Handle(std::string request) = 0;
-		virtual void run( MainEngine::ThreadData , u_int32t ) = 0 ;
+		virtual void run(  ) = 0 ;
 		
 	private :
 	
@@ -30,17 +30,21 @@ class AbstractThreadHandler : public ThreadHandler {
 		virtual std::string Handle(std::string request) override {
 			return {};
 		}
-		virtual void run ( MainEngine::ThreadData , u_int32t ) {}
+		virtual void run () {}
 };
 
 class ScrapeThread final : public AbstractThreadHandler {
 	private :
 	public :
-		virtual void run ( MainEngine::ThreadData , u_int32t ) override ;
+		ScrapeThread() = default ;
+		ScrapeThread ( MainEngine::ThreadData * _threadData, u_int32t _ID  ) : threadData ( _threadData ), ID ( _ID )  {}
+		virtual void run () override ;
 };
 
 class VerificationThread final: public AbstractThreadHandler {
 	private :
-	public :
-		virtual void run ( MainEngine::ThreadData , u_int32t ) override;
+	public :  
+		VerificationThread () = default ;
+		VerificationThread ( MainEngine::ThreadData * _threadData  ) threadData ( _threadData ) { ID = 0 ;}
+		virtual void run () override;
 };
